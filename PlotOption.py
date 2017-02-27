@@ -3,22 +3,24 @@
 ''' @Author: QinXY
     @Date  : 2016-12-20
 '''
-import southchinasea
-import os
 import math
-import shapefile
-import numpy as np
-import matplotlib.pylab as plt
+import os
+
 import matplotlib.colors as mpc
 import matplotlib.patches as mpatches
+import matplotlib.pylab as plt
+import numpy as np
+from matplotlib.patches import PathPatch
 from matplotlib.path import Path
 from mpl_toolkits.basemap import Basemap
-from matplotlib.patches import PathPatch
-from scipy.ndimage.filters import minimum_filter, maximum_filter
+from scipy.ndimage.filters import maximum_filter, minimum_filter
+
+import shapefile
+import southchinasea
 
 shpDir = "D:\\FigPlot\\SRCPt\\gx\\shp\\"
-#shpDir = "E:\\work\\shp\\guangxi\\"
-#outputDir = "E:\\work\\guangxi\\data\\"
+# shpDir = "E:\\work\\shp\\guangxi\\"
+# outputDir = "E:\\work\\guangxi\\data\\"
 outputDir = "E:\\work\\guangxi\\data\\"
 city = [u'南宁', u'玉林', u'防城港', u'钦州', u'北海', u'贵港', u'贺州',
         u'百色', u'来宾', u'崇左', u'柳州', u'河池', u'桂林', u'梧州']
@@ -42,18 +44,18 @@ vis_RGB = np.array([[158, 98, 38], [200, 17, 169], [238, 44, 44], [239, 117, 17]
 pslv_RGB = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
 
 # Set color cmap
-CMAP = {'t': mpc.ListedColormap(t_RGB/255.0),
-        'O3': mpc.ListedColormap(AQI_RGB/255.0),
-        'CO': mpc.ListedColormap(AQI_RGB/255.0),
-        'NO2': mpc.ListedColormap(AQI_RGB/255.0),
-        'SO2': mpc.ListedColormap(AQI_RGB/255.0),
-        'AQI': mpc.ListedColormap(AQI_RGB/255.0),
-        't2m': mpc.ListedColormap(t_RGB/255.0),
-        'VIS': mpc.ListedColormap(vis_RGB/255.0),
-        'PM10': mpc.ListedColormap(AQI_RGB/255.0),
-        'PM25': mpc.ListedColormap(AQI_RGB/255.0),
-        'pwat': mpc.ListedColormap(pwat_RGB/255.0),
-        'pslv': mpc.ListedColormap(pslv_RGB/255.0)
+CMAP = {'t': mpc.ListedColormap(t_RGB / 255.0),
+        'O3': mpc.ListedColormap(AQI_RGB / 255.0),
+        'CO': mpc.ListedColormap(AQI_RGB / 255.0),
+        'NO2': mpc.ListedColormap(AQI_RGB / 255.0),
+        'SO2': mpc.ListedColormap(AQI_RGB / 255.0),
+        'AQI': mpc.ListedColormap(AQI_RGB / 255.0),
+        't2m': mpc.ListedColormap(t_RGB / 255.0),
+        'VIS': mpc.ListedColormap(vis_RGB / 255.0),
+        'PM10': mpc.ListedColormap(AQI_RGB / 255.0),
+        'PM25': mpc.ListedColormap(AQI_RGB / 255.0),
+        'pwat': mpc.ListedColormap(pwat_RGB / 255.0),
+        'pslv': mpc.ListedColormap(pslv_RGB / 255.0)
         }
 
 # Set RGB color
@@ -85,17 +87,17 @@ UNIT = {'t': r'$^\circ$C',
         'pwat': r'$mm$'}
 
 # Set levels
-LEVELS = {'PM25': [0-0.01, 35, 75, 115, 150, 250, 350, 9999],
-          'PM10': [0-0.01, 50, 150, 250, 350, 420, 500, 9999],
-          'SO2': [0-0.01, 150, 500, 650, 800, 1600, 2100, 99999],
-          'NO2': [0-0.01, 100, 200, 700, 1200, 2340, 3090, 99999],
-          'O3': [0-0.01, 160, 200, 300, 400, 800, 1000, 99999],
-          'CO': [0-0.01, 5, 10, 35, 60, 90, 120, 99999],
-          'AQI': [0-0.01, 50, 100, 150, 200, 300, 400, 9999],
-          'pwat': [0-0.01, 0.1, 10, 25, 50, 100, 200, 400, 9999],
+LEVELS = {'PM25': [0 - 0.01, 35, 75, 115, 150, 250, 350, 9999],
+          'PM10': [0 - 0.01, 50, 150, 250, 350, 420, 500, 9999],
+          'SO2': [0 - 0.01, 150, 500, 650, 800, 1600, 2100, 99999],
+          'NO2': [0 - 0.01, 100, 200, 700, 1200, 2340, 3090, 99999],
+          'O3': [0 - 0.01, 160, 200, 300, 400, 800, 1000, 99999],
+          'CO': [0 - 0.01, 5, 10, 35, 60, 90, 120, 99999],
+          'AQI': [0 - 0.01, 50, 100, 150, 200, 300, 400, 9999],
+          'pwat': [0 - 0.01, 0.1, 10, 25, 50, 100, 200, 400, 9999],
           't': [-999, -10, -5, 0, 10, 15, 20, 25, 30, 35, 40, 99999],
           't2m': [-999, -15, -10, -5, 0, 10, 15, 20, 25, 30, 35, 40],
-          'VIS': [0-0.01, 0.2, 0.5, 1, 2, 3, 5, 10, 20, 30, 9999],
+          'VIS': [0 - 0.01, 0.2, 0.5, 1, 2, 3, 5, 10, 20, 30, 9999],
           'pslv': [0, 10, 9999]
           }
 
@@ -106,12 +108,12 @@ def Plot_CN(cmap, rgb, levels, unit, data, ename, lay, fdname, flname):
     fig = plt.figure(figsize=(3.2, 2.0), dpi=300, facecolor='w')
     ax = fig.add_subplot(111, frame_on=False, axisbg='w')
     plt.subplots_adjust(left=0, bottom=0., right=1, top=1, wspace=0.01, hspace=0.01)
-    M_CN.readshapefile(shpDir+'bou2_4p', name='whatever', drawbounds=True,
+    M_CN.readshapefile(shpDir + 'bou2_4p', name='whatever', drawbounds=True,
                        linewidth=0.1, color='black')
     NORM = mpc.BoundaryNorm(levels, cmap.N)
     clevs = np.arange(900, 1100., 2.5)
     if ename == 'CO':
-        cs = plt.contourf(data[1], data[2], data[0]/1000, cmap=cmap, levels=levels, norm=NORM)
+        cs = plt.contourf(data[1], data[2], data[0] / 1000, cmap=cmap, levels=levels, norm=NORM)
     elif ename == 'pslv':
         cs = plt.contour(data[1], data[2], data[0], clevs, colors='k', linewidths=0.3)
         x, y = M_CN(data[1], data[2])
@@ -124,32 +126,32 @@ def Plot_CN(cmap, rgb, levels, unit, data, ename, lay, fdname, flname):
         highvals = data[local_max]
         xyplotted = []
         # don't plot if there is already a L or H within dmin meters.
-        yoffset = 0.022*(M_CN.ymax-M_CN.ymin)
+        yoffset = 0.022 * (M_CN.ymax - M_CN.ymin)
         dmin = yoffset
         for x, y, p in zip(xlows, ylows, lowvals):
             if x < M_CN.xmax and x > M_CN.xmin and y < M_CN.ymax and y > M_CN.ymin:
-                dist = [np.sqrt((x-x0)**2+(y-y0)**2) for x0, y0 in xyplotted]
+                dist = [np.sqrt((x - x0)**2 + (y - y0)**2) for x0, y0 in xyplotted]
                 if not dist or min(dist) > dmin:
                     plt.text(x, y, 'L', fontsize=6, fontweight='bold',
                              ha='center', va='center', color='r')
-                    plt.text(x, y-yoffset, repr(int(p)), fontsize=3,
+                    plt.text(x, y - yoffset, repr(int(p)), fontsize=3,
                              ha='center', va='top', color='r',
                              bbox=dict(boxstyle="square", ec='None', fc=(1, 1, 1, 0.5)))
                     xyplotted.append((x, y))
         xyplotted = []
         for x, y, p in zip(xhighs, yhighs, highvals):
             if x < M_CN.xmax and x > M_CN.xmin and y < M_CN.ymax and y > M_CN.ymin:
-                dist = [np.sqrt((x-x0)**2+(y-y0)**2) for x0, y0 in xyplotted]
+                dist = [np.sqrt((x - x0)**2 + (y - y0)**2) for x0, y0 in xyplotted]
                 if not dist or min(dist) > dmin:
                     plt.text(x, y, 'H', fontsize=6, fontweight='bold',
                              ha='center', va='center', color='b')
-                    plt.text(x, y-yoffset, repr(int(p)), fontsize=3,
+                    plt.text(x, y - yoffset, repr(int(p)), fontsize=3,
                              ha='center', va='top', color='b',
                              bbox=dict(boxstyle="square", ec='None', fc=(1, 1, 1, 0.5)))
                     xyplotted.append((x, y))
 
     elif ename == 't' or ename == 't2m':
-        cs = plt.contourf(data[1], data[2], data[0]-273.15, cmap=cmap, levels=levels, norm=NORM)
+        cs = plt.contourf(data[1], data[2], data[0] - 273.15, cmap=cmap, levels=levels, norm=NORM)
     else:
         cs = ax.contourf(data[1], data[2], data[0], cmap=cmap, levels=levels, norm=NORM)
 
@@ -179,7 +181,7 @@ def Plot_CN(cmap, rgb, levels, unit, data, ename, lay, fdname, flname):
     if ename == 'pslv':
         pass
     else:
-        Maskout(cs, ax, shpDir+'country1', 'China', 3)
+        Maskout(cs, ax, shpDir + 'country1', 'China', 3)
         Legend_CN(levels, rgb, ax, unit)
     # plt.show()
     date_fcs = "20%s%s%s%s" % (data[3], data[4], data[5], data[6])
@@ -196,23 +198,23 @@ def Plot_GX(cmap, rgb, levels, unit, data, ename, lay, fdname, flname):
     fig = plt.figure(figsize=(3.2, 2.0), dpi=300, facecolor='w')
     ax = fig.add_subplot(111, frame_on=False, axisbg='w')
     plt.subplots_adjust(left=0, bottom=0., right=1, top=1, wspace=0.01, hspace=0.01)
-    M_GX.readshapefile(shpDir+'guangxi', name='whatever', drawbounds=True,
+    M_GX.readshapefile(shpDir + 'guangxi', name='whatever', drawbounds=True,
                        linewidth=0.1, color='black')
     NORM = mpc.BoundaryNorm(levels, cmap.N)
     clevs = np.arange(900, 1100., 2.5)
     if ename == 'CO':
-        cs = plt.contourf(data[1], data[2], data[0]/1000, cmap=cmap, levels=levels, norm=NORM)
+        cs = plt.contourf(data[1], data[2], data[0] / 1000, cmap=cmap, levels=levels, norm=NORM)
     elif ename == 'pslv':
         cs = plt.contour(data[1], data[2], data[0], clevs, colors='k', linewidths=0.4)
     elif ename == 't' or ename == 't2m':
-        cs = plt.contourf(data[1], data[2], data[0]-273.15, cmap=cmap, levels=levels, norm=NORM)
+        cs = plt.contourf(data[1], data[2], data[0] - 273.15, cmap=cmap, levels=levels, norm=NORM)
     else:
         cs = ax.contourf(data[1], data[2], data[0], cmap=cmap, levels=levels, norm=NORM)
 
     plt.scatter(LON, LAT, c='black', marker='o', s=7, linewidths=0.1, alpha=1)
     for i in range(len(city)):
         x, y, name = [LON[i], LAT[i], city[i]]
-        plt.text(x-0.15, y-0.235, name, alpha=1,
+        plt.text(x - 0.15, y - 0.235, name, alpha=1,
                  fontdict={'color': 'black', 'weight': 'medium', 'size': 4})
 
     if ename == 'NO2':
@@ -240,7 +242,7 @@ def Plot_GX(cmap, rgb, levels, unit, data, ename, lay, fdname, flname):
     if ename == 'pslv':
         pass
     else:
-        Maskout(cs, ax, shpDir+'bou2_4p', [450000], 4)
+        Maskout(cs, ax, shpDir + 'bou2_4p', [450000], 4)
         Legend_GX(levels, rgb, ax, unit)
     # plt.show()
     date_fcs = "20%s%s%s%s" % (data[3], data[4], data[5], data[6])
@@ -263,16 +265,16 @@ def PlotWind_CN(data, ename, lay, fdname, flname):
     dirr = np.reshape(dirc, (260, 430))
     lonx, latx = lonn[::10, ::10], latt[::10, ::10]
     spdx, dirx = spdd[::10, ::10], dirr[::10, ::10]
-    lonx = np.reshape(lonx, (43*26, 1))
-    latx = np.reshape(latx, (43*26, 1))
-    spdx = np.reshape(spdx, (43*26, 1))
-    dirx = np.reshape(dirx, (43*26, 1))
+    lonx = np.reshape(lonx, (43 * 26, 1))
+    latx = np.reshape(latx, (43 * 26, 1))
+    spdx = np.reshape(spdx, (43 * 26, 1))
+    dirx = np.reshape(dirx, (43 * 26, 1))
     PI = math.pi
     llon = lonx
     llat = latx
     spdd = spdx
     dirr = dirx
-    tmp = (270.0-dirr)*PI/180.0
+    tmp = (270.0 - dirr) * PI / 180.0
     u, v = [], []
     for i in range(len(tmp)):
         ux = spdd[i] * math.cos(tmp[i])
@@ -283,7 +285,7 @@ def PlotWind_CN(data, ename, lay, fdname, flname):
 
     fig.add_subplot(111, frame_on=False, axisbg='w')
     plt.subplots_adjust(left=0, bottom=0., right=1, top=1, wspace=0.01, hspace=0.01)
-    M_CN.readshapefile(shpDir+'bou2_4p', name='whatever', drawbounds=True, linewidth=0.1, color='black')
+    M_CN.readshapefile(shpDir + 'bou2_4p', name='whatever', drawbounds=True, linewidth=0.1, color='black')
     Q = M_CN.quiver(llon, llat, u, v, scale=10, units='x', pivot='tip', width=0.05, headlength=2)
     date_fcs = "20%s%s%s%s" % (data[1], data[2], data[3], data[4])
     if ename == 'u_v':
@@ -293,8 +295,8 @@ def PlotWind_CN(data, ename, lay, fdname, flname):
     elif ename == 'u10m_v10m':
         plt.text(92, 51, u'全国10米高风场未来%s小时预报' % data[5], fontsize=8, alpha=1)
     plt.text(96, 48.5, u'起报时间：$20%s$年$%s$月$%s$日$%s$时' % (data[1], data[2], data[3], data[4]), fontsize=4, alpha=1)
-    qk = plt.quiverkey(Q, 0.02, 0.08, 20, '        20 m/s', labelpos='S',
-                       fontproperties={'size': 4}, color='black', labelcolor='black')
+    plt.quiverkey(Q, 0.02, 0.08, 20, '        20 m/s', labelpos='S',
+                  fontproperties={'size': 4}, color='black', labelcolor='black')
     # plt.show()
     if not os.path.exists(os.path.join(outputDir, date_fcs, 'CN', '%s') % fdname):
         os.mkdir(os.path.join(outputDir, date_fcs, 'CN', '%s') % fdname)
@@ -314,7 +316,7 @@ def PlotWind_GX(data, ename, lay, fdname, flname):
     llat = lat.as_matrix(columns=None)
     spdd = spd.as_matrix(columns=None)
     dirr = dir.as_matrix(columns=None)
-    tmp = (270.0-dirr)*PI/180.0
+    tmp = (270.0 - dirr) * PI / 180.0
     u, v = [], []
     for i in range(len(tmp)):
         ux = spdd[i] * math.cos(tmp[i])
@@ -326,7 +328,7 @@ def PlotWind_GX(data, ename, lay, fdname, flname):
 
     fig.add_subplot(111, frame_on=False, axisbg='w')
     plt.subplots_adjust(left=0, bottom=0., right=1, top=1, wspace=0.01, hspace=0.01)
-    M_GX.readshapefile(shpDir+'guangxi', name='whatever', drawbounds=True, linewidth=0.1, color='black')
+    M_GX.readshapefile(shpDir + 'guangxi', name='whatever', drawbounds=True, linewidth=0.1, color='black')
     M_GX.quiver(llon, llat, u, v, scale=17, units='x', pivot='tip', width=0.012, headlength=5)
     date_fcs = "20%s%s%s%s" % (data[1], data[2], data[3], data[4])
     if ename == 'u_v':
@@ -380,28 +382,28 @@ def Maskout(originfig, ax, shpfile, region, m):
 
 # Add legend
 def Legend_CN(levels, rgb, ax, unit):
-    for i in range(len(levels)-1):
-        patch = mpatches.FancyBboxPatch((73, 16+1.6*i), 1.2, 0.7, boxstyle='round, pad=0.24',
-                                        fc=rgb[i]/255.0, ec='black', lw=0.03)
+    for i in range(len(levels) - 1):
+        patch = mpatches.FancyBboxPatch((73, 16 + 1.6 * i), 1.2, 0.7, boxstyle='round, pad=0.24',
+                                        fc=rgb[i] / 255.0, ec='black', lw=0.03)
         if i == 0:
-            ax.text(75, 16+1.6*i, r'$< %s$  %s' % (levels[i+1], unit), fontsize=3)
-        elif i == len(levels)-2:
-            ax.text(75, 16+1.6*i, r'$> %s$  %s' % (levels[i], unit), fontsize=3)
+            ax.text(75, 16 + 1.6 * i, r'$< %s$  %s' % (levels[i + 1], unit), fontsize=3)
+        elif i == len(levels) - 2:
+            ax.text(75, 16 + 1.6 * i, r'$> %s$  %s' % (levels[i], unit), fontsize=3)
         else:
-            ax.text(75, 16+1.6*i, r'$%s - %s$  %s' % (levels[i], levels[i+1], unit), fontsize=3)
+            ax.text(75, 16 + 1.6 * i, r'$%s - %s$  %s' % (levels[i], levels[i + 1], unit), fontsize=3)
         ax.add_patch(patch)
 
 
 def Legend_GX(levels, rgb, ax, unit):
-    for i in range(len(levels)-1):
-        patch = mpatches.FancyBboxPatch((104.32, 20.90+0.25*i), 0.14, 0.07, boxstyle='round, pad=0.04',
-                                        fc=rgb[i]/255.0, ec='black', lw=0.03)
+    for i in range(len(levels) - 1):
+        patch = mpatches.FancyBboxPatch((104.32, 20.90 + 0.25 * i), 0.14, 0.07, boxstyle='round, pad=0.04',
+                                        fc=rgb[i] / 255.0, ec='black', lw=0.03)
         if i == 0:
-            ax.text(104.67, 20.90+0.25*i, r'$< %s$  %s' % (levels[i+1], unit), fontsize=3)
-        elif i == len(levels)-2:
-            ax.text(104.67, 20.90+0.25*i, r'$> %s$  %s' % (levels[i], unit), fontsize=3)
+            ax.text(104.67, 20.90 + 0.25 * i, r'$< %s$  %s' % (levels[i + 1], unit), fontsize=3)
+        elif i == len(levels) - 2:
+            ax.text(104.67, 20.90 + 0.25 * i, r'$> %s$  %s' % (levels[i], unit), fontsize=3)
         else:
-            ax.text(104.67, 20.90+0.25*i, r'$%s - %s$  %s' % (levels[i], levels[i+1], unit), fontsize=3)
+            ax.text(104.67, 20.90 + 0.25 * i, r'$%s - %s$  %s' % (levels[i], levels[i + 1], unit), fontsize=3)
         ax.add_patch(patch)
 
 

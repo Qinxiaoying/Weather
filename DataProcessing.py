@@ -3,17 +3,17 @@
 '''@Author: QinXY
    @Date  : 2016-12-20
 '''
-import PlotOption
-import os
-import time
-import tarfile
 import multiprocessing
+import os
+import tarfile
+import time
+from datetime import datetime, timedelta
+
 import numpy as np
 import pandas as pd
-from datetime import datetime
-from datetime import timedelta
 from scipy.ndimage.interpolation import map_coordinates
 
+import PlotOption
 
 inputDir = "Z:\\world_nwp\\ENVIRONMENT\\CUACE\\"
 outputDir = "D:\\Tomcat\\webapps\\EnsoGuangxi\\sys\\mai_plts\\fcst\\country\\"
@@ -44,8 +44,8 @@ def WriteNewTime(latest_time):
             f.write(latest_time)
     except:
         pass
-            
-            
+
+
 def TarFile(str_tar, latest_time):
     files = os.listdir(inputDir)
     for file in files:
@@ -77,7 +77,7 @@ def Routing(fname, lt_time):
                 os.mkdir(fn_GX)
                 os.mkdir(fn_C)
                 os.mkdir(fn_G)
-            #Running(layer, pp, file)
+            # Running(layer, pp, file)
             pool.apply_async(Running, (layer, pp, file, ))
     pool.close()
     pool.join()
@@ -134,14 +134,14 @@ def ReadData(*inf):
     xx = np.linspace(stlon, edlon, xnum)
     yy = np.linspace(stlat, edlat, ynum)
     X, Y = np.meshgrid(xx, yy)
-    xnew = np.linspace(stlon, 137, xnum*rls_x)
-    ynew = np.linspace(stlat, 55, ynum*rls_y)
+    xnew = np.linspace(stlon, 137, xnum * rls_x)
+    ynew = np.linspace(stlat, 55, ynum * rls_y)
     XN, YN = np.meshgrid(xnew, ynew)
     df = pd.read_table(fn_f, skiprows=2, header=None, delim_whitespace=True)
     df[df == 9999.00] = np.nan
     data = np.reshape(df.as_matrix(columns=None), (ynum, xnum))
-    new_x = np.linspace(0, xnum-1, xnum*rls_x)
-    new_y = np.linspace(0, ynum-1, ynum*rls_y)
+    new_x = np.linspace(0, xnum - 1, xnum * rls_x)
+    new_y = np.linspace(0, ynum - 1, ynum * rls_y)
     coords = np.array(np.meshgrid(new_x, new_y))
     B = map_coordinates(data.T, coords, mode='nearest', prefilter=False)
     return B, XN, YN, year, month, day, hour, prep

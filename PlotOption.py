@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-
+''' @Author: QinXY
+    @Date  : 2016-12-20
+'''
 import southchinasea
 import os
 import math

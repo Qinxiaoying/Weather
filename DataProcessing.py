@@ -1,6 +1,8 @@
 #!/usr/bin/evn python
 # -*- coding:utf-8 -*-
-
+'''@Author: QinXY
+   @Date  : 2016-12-20
+'''
 import PlotOption
 import os
 import time

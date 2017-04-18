@@ -5,7 +5,6 @@
 '''
 import math
 import os
-
 import matplotlib.colors as mpc
 import matplotlib.patches as mpatches
 import matplotlib.pylab as plt
@@ -14,7 +13,6 @@ from matplotlib.patches import PathPatch
 from matplotlib.path import Path
 from mpl_toolkits.basemap import Basemap
 from scipy.ndimage.filters import maximum_filter, minimum_filter
-
 import shapefile
 import southchinasea
 
